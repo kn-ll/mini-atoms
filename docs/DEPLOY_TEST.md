@@ -44,17 +44,18 @@ http://localhost:3000
 3. Framework Preset 选择 Next.js。
 4. Build Command 使用 `npm run build`。
 5. Output Directory 保持默认。
-6. 如需接入 Compass `glm-5`，在 Environment Variables 中配置：
+6. 如需接入 SiliconFlow `Pro/zai-org/GLM-5.1`，在 Environment Variables 中配置：
 
 ```text
-LLM_PROVIDER=compass
-COMPASS_API_KEY
+LLM_PROVIDER=siliconflow
+SILICONFLOW_API_KEY
+SILICONFLOW_MODEL=Pro/zai-org/GLM-5.1
 ```
 
 7. Environment Variables 要勾选实际使用的环境，例如 `Production` 或 `Preview`。
 8. 修改环境变量后必须重新部署，旧 Deployment 不会自动拿到新值。
 9. `app/api/generate/route.ts` 与 `app/api/refine/route.ts` 已显式设置 `runtime=nodejs` 和 `maxDuration=120`，用于避免 AI 生成较慢时在 Vercel 上被过早终止。
-10. 如果页面显示“生成来源 = 本地生成器”，继续看页面下方的黄色提示，会直接显示 Compass 回退原因，例如缺少环境变量、请求超时或上游报错。
+10. 如果页面显示“生成来源 = 本地生成器”，继续看页面下方的黄色提示，会直接显示 SiliconFlow 回退原因，例如缺少环境变量、请求超时或上游报错。
 
 ## 5. API 测试
 

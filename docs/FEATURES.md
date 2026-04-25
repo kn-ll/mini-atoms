@@ -106,11 +106,12 @@ mini-atoms-result.json
 
 默认使用本地生成器，保证没有 API Key 时也能运行。
 
-参考 `deep_reasoning_debate` 项目的接入方式，配置以下环境变量后，后端会尝试调用 Compass 的 Chat Completions 兼容接口，模型固定为 `glm-5`：
+配置以下环境变量后，后端会尝试调用 SiliconFlow 的 Chat Completions 兼容接口，默认模型为 `Pro/zai-org/GLM-5.1`：
 
 ```text
-LLM_PROVIDER=compass
-COMPASS_API_KEY
+LLM_PROVIDER=siliconflow
+SILICONFLOW_API_KEY
+SILICONFLOW_MODEL=Pro/zai-org/GLM-5.1
 ```
 
 Provider 失败时会自动回退到本地生成器。

@@ -61,7 +61,7 @@ export interface GeneratedProject {
   agents: AgentRun[];
   files: GeneratedFiles;
   review: ReviewResult;
-  provider: "local" | "compass";
+  provider: "local" | "siliconflow";
   providerNote?: string;
 }
 

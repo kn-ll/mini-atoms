@@ -423,7 +423,7 @@ export function BuilderShell() {
           </article>
           <article>
             <span>生成来源</span>
-            <strong>{project?.provider === "compass" ? "Compass glm-5" : "本地生成器"}</strong>
+            <strong>{project?.provider === "siliconflow" ? "SiliconFlow GLM-5.1" : "本地生成器"}</strong>
           </article>
           <article>
             <span>修复项</span>
