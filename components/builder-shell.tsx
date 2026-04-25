@@ -38,8 +38,8 @@ export default function App() {
     <main className="starter-preview">
       <section>
         <p className="eyebrow">Mini Atoms</p>
-        <h1>Ready to generate</h1>
-        <p>Enter a product idea and run the agent pipeline.</p>
+        <h1>可以开始生成了</h1>
+        <p>输入你的产品想法，然后启动智能体流水线。</p>
       </section>
     </main>
   );
@@ -171,7 +171,7 @@ function storeHistory(projects: GeneratedProject[]) {
 
 export function BuilderShell() {
   const [templates, setTemplates] = useState<TemplatePrompt[]>([]);
-  const [prompt, setPrompt] = useState("Build a support operations dashboard with SLA tracking, assignee workload, and escalation actions.");
+  const [prompt, setPrompt] = useState("构建一个客服运营看板，包含 SLA 跟踪、负责人负载和升级处理动作。");
   const [refinePrompt, setRefinePrompt] = useState("");
   const [mode, setMode] = useState<GenerationMode>("balanced");
   const [busy, setBusy] = useState(false);
@@ -230,7 +230,7 @@ export function BuilderShell() {
             return;
           }
           const agentId = payloadData.id;
-          const text = typeof payloadData.text === "string" ? payloadData.text : "Running";
+          const text = typeof payloadData.text === "string" ? payloadData.text : "执行中";
           setAgents((current) => updateAgent(current, agentId, "running", text));
         }
 
@@ -240,7 +240,7 @@ export function BuilderShell() {
             return;
           }
           const agentId = payloadData.id;
-          const text = typeof payloadData.text === "string" ? payloadData.text : "Done";
+          const text = typeof payloadData.text === "string" ? payloadData.text : "已完成";
           setAgents((current) => updateAgent(current, agentId, "done", text));
         }
 
@@ -261,7 +261,7 @@ export function BuilderShell() {
         }
       });
     } catch (streamError) {
-      const message = streamError instanceof Error ? streamError.message : "Generation failed";
+      const message = streamError instanceof Error ? streamError.message : "生成失败";
       setError(message);
       setAgents((current) => updateAgent(current, "reviewer", "error", message));
     } finally {
@@ -283,7 +283,11 @@ export function BuilderShell() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${project.spec.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "mini-atoms"}.zip`;
+    link.download = `${project.spec.title
+      .trim()
+      .replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-")
+      .replace(/\s+/g, "-")
+      .slice(0, 80) || "mini-atoms"}.zip`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -297,20 +301,20 @@ export function BuilderShell() {
           <div className="brand-mark">MA</div>
           <div>
             <strong>Mini Atoms</strong>
-            <span>Agent app builder</span>
+            <span>智能体应用生成器</span>
           </div>
         </div>
 
         <section className="control-block">
           <div className="section-head">
-            <label htmlFor="prompt">Prompt</label>
+            <label htmlFor="prompt">需求描述</label>
             <Sparkles size={16} aria-hidden="true" />
           </div>
           <textarea id="prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} />
         </section>
 
         <section className="control-block">
-          <span className="field-label">Templates</span>
+          <span className="field-label">快捷模板</span>
           <div className="template-grid">
             {templates.map((template) => (
               <button key={template.id} type="button" onClick={() => setPrompt(template.prompt)}>
@@ -321,13 +325,13 @@ export function BuilderShell() {
         </section>
 
         <section className="control-block">
-          <span className="field-label">Mode</span>
+          <span className="field-label">生成模式</span>
           <div className="segment-control">
             <button type="button" className={mode === "balanced" ? "active" : ""} onClick={() => setMode("balanced")}>
-              Balanced
+              平衡
             </button>
             <button type="button" className={mode === "polished" ? "active" : ""} onClick={() => setMode("polished")}>
-              Polished
+              精修
             </button>
           </div>
         </section>
@@ -339,23 +343,29 @@ export function BuilderShell() {
           onClick={() => run("/api/generate", { prompt, mode })}
         >
           {busy ? <Loader2 className="spin" size={18} /> : <Wand2 size={18} />}
-          <span>{busy ? "Working" : "Generate"}</span>
+          <span>{busy ? "生成中" : "开始生成"}</span>
         </button>
 
         <section className="history-block">
           <div className="section-head">
-            <span className="field-label">History</span>
+            <span className="field-label">历史记录</span>
             <History size={16} aria-hidden="true" />
           </div>
           <div className="history-list">
             {history.length === 0 ? (
-              <p>No saved projects yet.</p>
+              <p>还没有保存过项目。</p>
             ) : (
               history.map((item) => (
                 <button key={item.id} type="button" onClick={() => persistProject(item)}>
                   <Clock3 size={15} aria-hidden="true" />
                   <span>{item.spec.title}</span>
-                  <small>{new Date(item.spec.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small>
+                  <small>
+                    {new Date(item.spec.createdAt).toLocaleTimeString("zh-CN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false
+                    })}
+                  </small>
                 </button>
               ))
             )}
@@ -366,26 +376,39 @@ export function BuilderShell() {
       <section className="workspace">
         <header className="workspace-header">
           <div>
-            <p className="eyebrow">AI Native Prototype</p>
-            <h1>{project?.spec.title || "Atoms Demo Builder"}</h1>
+            <p className="eyebrow">AI 原生原型</p>
+            <h1>{project?.spec.title || "Atoms 原型工坊"}</h1>
           </div>
           <div className="toolbar">
-            <button type="button" onClick={() => project && run("/api/refine", { prompt: "Refresh the visual hierarchy and keep the same scope.", previousPrompt: project.spec.prompt, previousFiles: project.files, mode })} disabled={busy || !project} title="Run a quick refinement">
+            <button
+              type="button"
+              onClick={() =>
+                project &&
+                run("/api/refine", {
+                  prompt: "优化视觉层级，保持当前功能范围不变。",
+                  previousPrompt: project.spec.prompt,
+                  previousFiles: project.files,
+                  mode
+                })
+              }
+              disabled={busy || !project}
+              title="快速优化当前原型"
+            >
               <RefreshCw size={17} />
-              <span>Refresh</span>
+              <span>快速优化</span>
             </button>
-            <button type="button" onClick={exportZip} disabled={!project} title="Export generated project as ZIP">
+            <button type="button" onClick={exportZip} disabled={!project} title="将生成结果导出为 ZIP">
               <Download size={17} />
-              <span>ZIP</span>
+              <span>导出 ZIP</span>
             </button>
           </div>
         </header>
 
-        <section className="agent-strip" aria-label="Agent status">
+        <section className="agent-strip" aria-label="智能体状态">
           {agents.map((agent) => (
             <article key={agent.id} data-status={agent.status}>
-              <span>{agent.role}</span>
-              <strong>{agent.name}</strong>
+              <span>智能体</span>
+              <strong>{agent.role}</strong>
               <p>{agent.text}</p>
             </article>
           ))}
@@ -395,15 +418,15 @@ export function BuilderShell() {
 
         <section className="review-row">
           <article>
-            <span>Quality</span>
+            <span>质量评分</span>
             <strong>{review?.score ?? project?.review.score ?? 0}%</strong>
           </article>
           <article>
-            <span>Provider</span>
-            <strong>{project?.provider || "local"}</strong>
+            <span>生成来源</span>
+            <strong>{project?.provider === "compass" ? "Compass glm-5" : "本地"}</strong>
           </article>
           <article>
-            <span>Repairs</span>
+            <span>修复项</span>
             <strong>{repairLog.length}</strong>
           </article>
         </section>
@@ -412,7 +435,7 @@ export function BuilderShell() {
           <input
             value={refinePrompt}
             onChange={(event) => setRefinePrompt(event.target.value)}
-            placeholder="Refine the generated app"
+            placeholder="输入进一步优化要求"
           />
           <button
             type="button"
@@ -431,7 +454,7 @@ export function BuilderShell() {
             }}
           >
             <Play size={17} />
-            <span>Refine</span>
+            <span>继续优化</span>
           </button>
         </section>
 

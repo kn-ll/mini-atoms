@@ -44,12 +44,11 @@ http://localhost:3000
 3. Framework Preset 选择 Next.js。
 4. Build Command 使用 `npm run build`。
 5. Output Directory 保持默认。
-6. 如需真实模型，在 Environment Variables 中配置：
+6. 如需接入 Compass `glm-5`，在 Environment Variables 中配置：
 
 ```text
-OPENAI_API_KEY
-OPENAI_BASE_URL
-OPENAI_MODEL
+LLM_PROVIDER=compass
+COMPASS_API_KEY
 ```
 
 ## 5. API 测试

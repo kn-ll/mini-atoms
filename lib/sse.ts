@@ -17,7 +17,7 @@ export function createSseStream(handler: (send: SendEvent) => Promise<void>): Re
         send("done", { ok: true });
       } catch (error) {
         send("error", {
-          message: error instanceof Error ? error.message : "Unknown generation error"
+          message: error instanceof Error ? error.message : "生成过程中发生未知错误"
         });
       } finally {
         controller.close();

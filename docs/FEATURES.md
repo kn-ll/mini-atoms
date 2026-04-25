@@ -106,12 +106,11 @@ mini-atoms-result.json
 
 默认使用本地生成器，保证没有 API Key 时也能运行。
 
-配置以下环境变量后，后端会尝试调用 OpenAI-compatible Chat Completions：
+参考 `deep_reasoning_debate` 项目的接入方式，配置以下环境变量后，后端会尝试调用 Compass 的 Chat Completions 兼容接口，模型固定为 `glm-5`：
 
 ```text
-OPENAI_API_KEY
-OPENAI_BASE_URL
-OPENAI_MODEL
+LLM_PROVIDER=compass
+COMPASS_API_KEY
 ```
 
 Provider 失败时会自动回退到本地生成器。

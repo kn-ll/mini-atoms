@@ -44,9 +44,9 @@ http://localhost:3000
 ```json
 {
   "id": "pm",
-  "name": "Emma",
-  "role": "Product Manager",
-  "text": "Turning the prompt into product scope"
+  "name": "产品代理",
+  "role": "产品经理",
+  "text": "正在把输入整理成产品范围"
 }
 ```
 
@@ -55,7 +55,7 @@ http://localhost:3000
 ```json
 {
   "id": "pm",
-  "text": "Product scope ready"
+  "text": "产品范围已整理完成"
 }
 ```
 
@@ -66,9 +66,9 @@ http://localhost:3000
   "score": 100,
   "checks": [
     {
-      "name": "React entry file",
+      "name": "React 入口文件",
       "passed": true,
-      "detail": "/App.tsx is present."
+      "detail": "/App.tsx 已存在。"
     }
   ],
   "repairs": []
@@ -81,7 +81,7 @@ http://localhost:3000
 
 ```json
 {
-  "repairs": ["Added missing styles import to /App.tsx."]
+  "repairs": ["已为 /App.tsx 补充缺失的样式导入。"]
 }
 ```
 
@@ -90,18 +90,18 @@ http://localhost:3000
 ```json
 {
   "id": "project-uuid",
-  "summary": "OpsPilot Console is a runnable internal React prototype generated from the prompt.",
+  "summary": "运营值班台是一个根据需求生成的可运行内部运营 React 原型。",
   "spec": {
     "id": "project-uuid",
-    "prompt": "Build a support operations dashboard with SLA tracking",
+    "prompt": "构建一个客服运营看板，包含 SLA 跟踪",
     "mode": "balanced",
     "domain": "internal",
     "tone": "modern",
-    "title": "OpsPilot Console",
-    "audience": "operations teams resolving daily work",
-    "features": ["SLA overview", "Assignee board"],
-    "primaryAction": "Create Plan",
-    "secondaryAction": "Assign Owner",
+    "title": "运营值班台",
+    "audience": "处理日常业务流转的运营团队",
+    "features": ["SLA 总览", "负责人看板"],
+    "primaryAction": "创建方案",
+    "secondaryAction": "分配负责人",
     "createdAt": "2026-04-25T00:00:00.000Z"
   },
   "agents": [],
@@ -116,7 +116,7 @@ http://localhost:3000
     "checks": [],
     "repairs": []
   },
-  "provider": "local"
+  "provider": "compass"
 }
 ```
 

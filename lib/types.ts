@@ -61,7 +61,7 @@ export interface GeneratedProject {
   agents: AgentRun[];
   files: GeneratedFiles;
   review: ReviewResult;
-  provider: "local" | "openai-compatible";
+  provider: "local" | "compass";
 }
 
 export interface GenerateRequest {

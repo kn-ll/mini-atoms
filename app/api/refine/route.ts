@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   const stream = createSseStream(async (send) => {
     if (!body.prompt?.trim()) {
-      throw new Error("prompt is required");
+      throw new Error("请输入优化要求。");
     }
 
     for (const agent of agentDefinitions) {

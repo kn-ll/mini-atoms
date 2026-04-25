@@ -33,6 +33,16 @@ function jsxText(value: string): string {
     .replaceAll("}", "&#125;");
 }
 
+function domainLabel(domain: DomainType): string {
+  return {
+    commerce: "电商",
+    fitness: "健身",
+    internal: "内部运营",
+    saas: "订阅 SaaS",
+    workspace: "工作台"
+  }[domain];
+}
+
 function inferDomain(prompt: string): DomainType {
   const text = prompt.toLowerCase();
   if (/(shop|store|commerce|cart|sku|product|e-?commerce|retail|商品|购物|电商)/.test(text)) {
@@ -66,11 +76,11 @@ function inferTone(prompt: string): ToneType {
 
 function inferFeatures(prompt: string, domain: DomainType): string[] {
   const defaults: Record<DomainType, string[]> = {
-    commerce: ["Collection filters", "Cart summary", "Conversion metrics", "Launch checklist"],
-    fitness: ["Weekly plan", "Streak tracking", "Goal progress", "Workout notes"],
-    internal: ["SLA overview", "Assignee board", "Escalation queue", "Resolution checklist"],
-    saas: ["MRR snapshot", "Churn risk", "Account health", "Growth actions"],
-    workspace: ["Task intake", "Build status", "Insight cards", "Action queue"]
+    commerce: ["分类筛选", "购物车概览", "转化指标", "上新清单"],
+    fitness: ["每周计划", "连续打卡", "目标进度", "训练备注"],
+    internal: ["SLA 总览", "负责人看板", "升级队列", "处理清单"],
+    saas: ["MRR 快照", "流失风险", "账户健康度", "增长动作"],
+    workspace: ["任务入口", "构建状态", "洞察卡片", "行动队列"]
   };
 
   const extracted = prompt
@@ -89,18 +99,18 @@ export function buildSpec(promptInput: unknown, modeInput: unknown = "balanced")
   const domain = inferDomain(prompt);
   const tone = inferTone(prompt);
   const titleByDomain: Record<DomainType, string> = {
-    commerce: "LaunchCart Studio",
-    fitness: "StrideFlow",
-    internal: "OpsPilot Console",
-    saas: "RevenueLens",
-    workspace: "BuildBoard"
+    commerce: "灵析商城中台",
+    fitness: "跃动习惯台",
+    internal: "运营值班台",
+    saas: "订阅增长台",
+    workspace: "构建工作台"
   };
   const audienceByDomain: Record<DomainType, string> = {
-    commerce: "growth teams running online stores",
-    fitness: "people building measurable routines",
-    internal: "operations teams resolving daily work",
-    saas: "founders tracking subscription momentum",
-    workspace: "builders turning ideas into working tools"
+    commerce: "负责线上零售增长的团队",
+    fitness: "希望建立可量化习惯的人群",
+    internal: "处理日常业务流转的运营团队",
+    saas: "跟踪订阅增长势能的创业团队",
+    workspace: "把想法快速变成工具的构建者"
   };
 
   return {
@@ -112,8 +122,8 @@ export function buildSpec(promptInput: unknown, modeInput: unknown = "balanced")
     title: titleByDomain[domain],
     audience: audienceByDomain[domain],
     features: inferFeatures(prompt, domain),
-    primaryAction: domain === "commerce" ? "Publish Collection" : domain === "fitness" ? "Log Workout" : "Create Plan",
-    secondaryAction: domain === "internal" ? "Assign Owner" : "Review Insights",
+    primaryAction: domain === "commerce" ? "发布专题" : domain === "fitness" ? "记录训练" : "创建方案",
+    secondaryAction: domain === "internal" ? "分配负责人" : "查看洞察",
     createdAt: new Date().toISOString()
   };
 }
@@ -172,29 +182,29 @@ function paletteForTone(tone: ToneType) {
 function metricData(domain: DomainType): Array<[string, string, string]> {
   const data: Record<DomainType, Array<[string, string, string]>> = {
     commerce: [
-      ["Conversion", "8.4%", "+1.2%"],
-      ["Avg. order", "$76", "+$9"],
-      ["Active SKUs", "128", "+14"]
+      ["转化率", "8.4%", "+1.2%"],
+      ["客单价", "$76", "+$9"],
+      ["活跃 SKU", "128", "+14"]
     ],
     fitness: [
-      ["Weekly streak", "5 days", "+2"],
-      ["Goal progress", "72%", "+11%"],
-      ["Recovery score", "88", "Stable"]
+      ["本周连续打卡", "5 天", "+2"],
+      ["目标进度", "72%", "+11%"],
+      ["恢复评分", "88", "稳定"]
     ],
     internal: [
-      ["Open tickets", "42", "-8"],
-      ["SLA health", "94%", "+5%"],
-      ["Escalations", "6", "-3"]
+      ["待处理工单", "42", "-8"],
+      ["SLA 健康度", "94%", "+5%"],
+      ["升级单量", "6", "-3"]
     ],
     saas: [
       ["MRR", "$48.2k", "+12%"],
-      ["Churn risk", "7 accounts", "-4"],
-      ["Activation", "63%", "+9%"]
+      ["流失风险", "7 个账户", "-4"],
+      ["激活率", "63%", "+9%"]
     ],
     workspace: [
-      ["Ideas", "18", "+6"],
-      ["In build", "4", "+2"],
-      ["Ready", "9", "+3"]
+      ["想法池", "18", "+6"],
+      ["构建中", "4", "+2"],
+      ["已就绪", "9", "+3"]
     ]
   };
 
@@ -204,29 +214,29 @@ function metricData(domain: DomainType): Array<[string, string, string]> {
 function sampleRows(domain: DomainType): Array<[string, string, string, string]> {
   const rows: Record<DomainType, Array<[string, string, string, string]>> = {
     commerce: [
-      ["Nordic Desk Lamp", "Home Office", "High", "Launch"],
-      ["Travel Tech Pouch", "Accessories", "Medium", "Optimize"],
-      ["Ceramic Brew Kit", "Kitchen", "High", "Bundle"]
+      ["北欧台灯套装", "家居办公", "高优先级", "发布"],
+      ["旅行数码收纳包", "配件", "中优先级", "优化"],
+      ["手冲陶瓷礼盒", "厨房", "高优先级", "组合"]
     ],
     fitness: [
-      ["Monday Strength", "45 min", "Done", "Upper body"],
-      ["Wednesday Zone 2", "30 min", "Planned", "Cardio"],
-      ["Friday Mobility", "20 min", "Open", "Recovery"]
+      ["周一力量训练", "45 分钟", "已完成", "上肢"],
+      ["周三区间有氧", "30 分钟", "已计划", "心肺"],
+      ["周五灵活恢复", "20 分钟", "待开始", "恢复"]
     ],
     internal: [
-      ["Refund backlog", "Lena", "At risk", "Escalate"],
-      ["VIP onboarding", "Marco", "Healthy", "Review"],
-      ["Bug triage", "Nina", "Blocked", "Assign"]
+      ["退款积压处理", "李娜", "风险中", "升级"],
+      ["VIP 客户接入", "马柯", "健康", "复核"],
+      ["缺陷分诊", "倪娜", "阻塞", "分派"]
     ],
     saas: [
-      ["Acme Cloud", "Expansion", "Healthy", "Upsell"],
-      ["Northwind", "Renewal", "At risk", "Call"],
-      ["BluePeak", "Trial", "Warm", "Activate"]
+      ["Acme Cloud", "扩容机会", "健康", "升级销售"],
+      ["Northwind", "续约阶段", "风险中", "联系"],
+      ["BluePeak", "试用期", "升温", "激活"]
     ],
     workspace: [
-      ["Landing page", "Design", "Ready", "Build"],
-      ["Admin table", "Data", "In review", "Refine"],
-      ["Billing flow", "Backend", "Planned", "Scope"]
+      ["落地页", "设计", "已就绪", "构建"],
+      ["管理表格", "数据", "审查中", "优化"],
+      ["计费流程", "后端", "已规划", "梳理"]
     ]
   };
 
@@ -239,11 +249,11 @@ export function buildReactFiles(spec: AppSpec): GeneratedFiles {
   const rows = sampleRows(spec.domain);
   const features = spec.features;
   const safeTitle = jsxText(spec.title);
-  const safePrompt = jsxText(spec.prompt || "A focused app generated from a product idea.");
+  const safePrompt = jsxText(spec.prompt || "这是一个根据产品想法生成的聚焦型应用。");
   const safeAudience = jsxText(spec.audience);
   const safePrimaryAction = jsxText(spec.primaryAction);
   const safeSecondaryAction = jsxText(spec.secondaryAction);
-  const safeDomain = jsxText(titleCase(spec.domain));
+  const safeDomain = jsxText(domainLabel(spec.domain));
 
   const appTsx = `import "./styles.css";
 
@@ -254,19 +264,19 @@ const features = ${JSON.stringify(features, null, 2)} as const;
 export default function App() {
   return (
     <main className="app-shell">
-      <aside className="rail" aria-label="Workspace navigation">
+      <aside className="rail" aria-label="工作台导航">
         <div className="brand-mark">${safeTitle.slice(0, 2).toUpperCase()}</div>
         <nav>
-          <button className="nav-item active">Overview</button>
-          <button className="nav-item">Workflows</button>
-          <button className="nav-item">Reports</button>
+          <button className="nav-item active">概览</button>
+          <button className="nav-item">流程</button>
+          <button className="nav-item">报表</button>
         </nav>
       </aside>
 
       <section className="workspace">
         <header className="topbar">
           <div>
-            <p className="eyebrow">${safeDomain} Workspace</p>
+            <p className="eyebrow">${safeDomain}工作台</p>
             <h1>${safeTitle}</h1>
           </div>
           <div className="actions">
@@ -277,18 +287,18 @@ export default function App() {
 
         <section className="hero-grid">
           <div>
-            <p className="eyebrow">Built for ${safeAudience}</p>
-            <h2>${features[0] || "Launch faster with AI"}</h2>
+            <p className="eyebrow">服务对象：${safeAudience}</p>
+            <h2>${features[0] || "用 AI 更快完成落地"}</h2>
             <p>${safePrompt}</p>
           </div>
           <div className="score-panel">
-            <span>Readiness</span>
+            <span>就绪度</span>
             <strong>${spec.mode === "polished" ? "92%" : "86%"}</strong>
-            <small>Prototype quality score</small>
+            <small>原型质量评分</small>
           </div>
         </section>
 
-        <section className="metrics-grid" aria-label="Key metrics">
+        <section className="metrics-grid" aria-label="关键指标">
           {metrics.map(([label, value, delta]) => (
             <article key={label}>
               <span>{label}</span>
@@ -301,8 +311,8 @@ export default function App() {
         <section className="content-grid">
           <article className="panel">
             <div className="panel-head">
-              <h3>Focus Queue</h3>
-              <button className="icon-button" aria-label="Refresh queue">R</button>
+              <h3>重点队列</h3>
+              <button className="icon-button" aria-label="刷新队列">R</button>
             </div>
             <div className="row-list">
               {rows.map(([name, owner, status, action]) => (
@@ -320,8 +330,8 @@ export default function App() {
 
           <article className="panel">
             <div className="panel-head">
-              <h3>Generated Scope</h3>
-              <button className="icon-button" aria-label="Add item">+</button>
+              <h3>生成范围</h3>
+              <button className="icon-button" aria-label="新增条目">+</button>
             </div>
             <ul className="feature-list">
               {features.map((feature) => (
@@ -663,7 +673,7 @@ p {
 `,
     "/README.md": `# ${spec.title}
 
-Generated from:
+生成依据：
 
 ${spec.prompt}
 `
@@ -680,14 +690,42 @@ function isGeneratedFiles(value: unknown): value is GeneratedFiles {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
-async function generateWithOpenAICompatible(prompt: string, mode: GenerationMode): Promise<GeneratedProject | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL;
-  if (!apiKey || !model) {
+const LLM_PROVIDER = process.env.LLM_PROVIDER || "compass";
+
+const PROVIDERS = {
+  compass: {
+    baseUrl: "http://compass.llm.shopee.io/compass-api/v1/",
+    apiKeyEnv: "COMPASS_API_KEY",
+    model: "glm-5"
+  }
+} as const;
+
+type RemoteProviderName = keyof typeof PROVIDERS;
+
+function getProviderConfig() {
+  if (!(LLM_PROVIDER in PROVIDERS)) {
     return null;
   }
 
-  const baseUrl = (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+  return PROVIDERS[LLM_PROVIDER as RemoteProviderName];
+}
+
+function getProviderApiKey(apiKeyEnv: string): string {
+  return process.env[apiKeyEnv] || "";
+}
+
+async function generateWithConfiguredProvider(prompt: string, mode: GenerationMode): Promise<GeneratedProject | null> {
+  const config = getProviderConfig();
+  if (!config) {
+    return null;
+  }
+
+  const apiKey = getProviderApiKey(config.apiKeyEnv);
+  if (!apiKey) {
+    return null;
+  }
+
+  const baseUrl = config.baseUrl.replace(/\/$/, "");
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -695,47 +733,47 @@ async function generateWithOpenAICompatible(prompt: string, mode: GenerationMode
       authorization: `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model,
+      model: config.model,
       temperature: 0.35,
       messages: [
         {
           role: "system",
           content:
-            "Return strict JSON only. Generate a small React TypeScript Sandpack project. Required shape: {\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}. Do not use remote assets."
+            "只返回严格 JSON。生成一个小型 React TypeScript Sandpack 项目。要求结构：{\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。"
         },
         {
           role: "user",
-          content: `Mode: ${mode}\nPrompt: ${prompt}`
+          content: `模式：${mode}\n需求：${prompt}`
         }
       ]
     })
   });
 
   if (!response.ok) {
-    throw new Error(`AI provider returned ${response.status}.`);
+    throw new Error(`AI 服务返回状态码 ${response.status}。`);
   }
 
   const data = await response.json();
   const content = data?.choices?.[0]?.message?.content;
   if (!content) {
-    throw new Error("AI provider returned an empty response.");
+    throw new Error("AI 服务返回了空响应。");
   }
 
   const parsed = parseGeneratedJson(content) as { summary?: unknown; files?: unknown };
   if (!isGeneratedFiles(parsed.files)) {
-    throw new Error("AI provider response did not include a files object.");
+    throw new Error("AI 服务响应中缺少 files 对象。");
   }
 
   const spec = buildSpec(prompt, mode);
   const repaired = reviewAndRepairFiles(parsed.files);
   return {
     id: spec.id,
-    summary: typeof parsed.summary === "string" ? parsed.summary : `${spec.title} generated by configured AI provider.`,
+    summary: typeof parsed.summary === "string" ? parsed.summary : `${spec.title} 已由已配置的 AI 服务生成。`,
     spec,
     agents: buildAgentRuns(spec, repaired.review.repairs.length),
     files: repaired.files,
     review: repaired.review,
-    provider: "openai-compatible"
+    provider: "compass"
   };
 }
 
@@ -743,23 +781,23 @@ export async function generateProject(promptInput: unknown, modeInput: unknown =
   const prompt = clampText(promptInput);
   const mode: GenerationMode = modeInput === "polished" ? "polished" : "balanced";
   if (!prompt) {
-    throw new Error("prompt is required");
+    throw new Error("请输入需求描述。");
   }
 
   try {
-    const aiResult = await generateWithOpenAICompatible(prompt, mode);
+    const aiResult = await generateWithConfiguredProvider(prompt, mode);
     if (aiResult) {
       return aiResult;
     }
   } catch {
-    // Keep the demo available when a configured provider fails.
+    // Keep the demo available when the configured Compass provider fails.
   }
 
   const spec = buildSpec(prompt, mode);
   const repaired = reviewAndRepairFiles(buildReactFiles(spec));
   return {
     id: spec.id,
-    summary: `${spec.title} is a runnable ${spec.domain} React prototype generated from the prompt.`,
+    summary: `${spec.title} 是一个根据需求生成的可运行 ${domainLabel(spec.domain)} React 原型。`,
     spec,
     agents: buildAgentRuns(spec, repaired.review.repairs.length),
     files: repaired.files,
@@ -769,7 +807,7 @@ export async function generateProject(promptInput: unknown, modeInput: unknown =
 }
 
 export function composeRefinePrompt(previousPrompt: unknown, prompt: unknown): string {
-  const base = clampText(previousPrompt || "Previous generated app", 1200);
+  const base = clampText(previousPrompt || "上一次生成的应用", 1200);
   const change = clampText(prompt, 900);
-  return `${base}. Refine request: ${change}`;
+  return `${base}。优化要求：${change}`;
 }

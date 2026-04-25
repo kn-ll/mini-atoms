@@ -123,7 +123,7 @@ lib/generator.ts
 
 | 层 | 说明 |
 | --- | --- |
-| OpenAI-compatible Provider | 配置 `OPENAI_API_KEY` 和 `OPENAI_MODEL` 后启用 |
+| Compass Provider | 参考 `deep_reasoning_debate`，默认 `LLM_PROVIDER=compass`，配置 `COMPASS_API_KEY` 后启用 `glm-5` |
 | Local Generator | 默认启用，保证无 API Key 时仍可体验 |
 
 本地生成器会根据 Prompt 推断：

@@ -6,9 +6,9 @@ export default function App() {
   return (
     <main className="generated-app">
       <section className="empty-state">
-        <p className="eyebrow">Recovered prototype</p>
-        <h1>Generated app repaired</h1>
-        <p>The reviewer created a minimal React entry file because the generated project was missing one.</p>
+        <p className="eyebrow">已恢复原型</p>
+        <h1>生成结果已修复</h1>
+        <p>由于生成结果缺少 React 入口文件，审查器已补齐一个最小可运行版本。</p>
       </section>
     </main>
   );
@@ -80,81 +80,81 @@ export function reviewAndRepairFiles(inputFiles: GeneratedFiles): {
 
   if (!files["/App.tsx"]?.trim()) {
     files["/App.tsx"] = fallbackApp;
-    repairs.push("Created missing /App.tsx React entry file.");
+    repairs.push("已创建缺失的 /App.tsx React 入口文件。");
     checks.push({
-      name: "React entry file",
+      name: "React 入口文件",
       passed: true,
-      detail: "/App.tsx was missing and has been created.",
+      detail: "/App.tsx 缺失，已自动创建。",
       repaired: true
     });
   } else {
     checks.push({
-      name: "React entry file",
+      name: "React 入口文件",
       passed: true,
-      detail: "/App.tsx is present."
+      detail: "/App.tsx 已存在。"
     });
   }
 
   if (!files["/styles.css"]?.trim()) {
     files["/styles.css"] = fallbackCss;
-    repairs.push("Created missing /styles.css.");
+    repairs.push("已创建缺失的 /styles.css。");
     checks.push({
-      name: "Stylesheet",
+      name: "样式文件",
       passed: true,
-      detail: "/styles.css was missing and has been created.",
+      detail: "/styles.css 缺失，已自动创建。",
       repaired: true
     });
   } else {
     checks.push({
-      name: "Stylesheet",
+      name: "样式文件",
       passed: true,
-      detail: "/styles.css is present."
+      detail: "/styles.css 已存在。"
     });
   }
 
   const appSource = files["/App.tsx"] || "";
   if (!hasStylesImport(appSource)) {
     files["/App.tsx"] = `import "./styles.css";\n${appSource}`;
-    repairs.push("Added missing styles import to /App.tsx.");
+    repairs.push("已为 /App.tsx 补充缺失的样式导入。");
     checks.push({
-      name: "CSS import",
+      name: "CSS 导入",
       passed: true,
-      detail: "Reviewer added the local stylesheet import.",
+      detail: "审查器已补充本地样式文件导入。",
       repaired: true
     });
   } else {
     checks.push({
-      name: "CSS import",
+      name: "CSS 导入",
       passed: true,
-      detail: "/App.tsx imports ./styles.css."
+      detail: "/App.tsx 已导入 ./styles.css。"
     });
   }
 
   if (!hasDefaultExport(files["/App.tsx"] || "")) {
     if (canAppendDefaultExport(files["/App.tsx"] || "")) {
       files["/App.tsx"] = `${files["/App.tsx"]}\nexport default App;\n`;
-      repairs.push("Added missing default export for Sandpack.");
+      repairs.push("已补充 Sandpack 需要的默认导出。");
       checks.push({
-        name: "Default export",
+        name: "默认导出",
         passed: true,
-        detail: "Reviewer added a default App export.",
+        detail: "审查器已补充默认导出的 App。",
         repaired: true
       });
     } else {
       files["/App.tsx"] = fallbackApp;
-      repairs.push("Replaced invalid App source with a minimal valid React component.");
+      repairs.push("已将无效的 App 源码替换为最小可运行 React 组件。");
       checks.push({
-        name: "Default export",
+        name: "默认导出",
         passed: true,
-        detail: "Reviewer replaced invalid source with a default App export.",
+        detail: "审查器已替换无效源码并补上默认导出。",
         repaired: true
       });
     }
   } else {
     checks.push({
-      name: "Default export",
+      name: "默认导出",
       passed: true,
-      detail: "/App.tsx has a default export."
+      detail: "/App.tsx 已包含默认导出。"
     });
   }
 
@@ -170,35 +170,35 @@ export function reviewAndRepairFiles(inputFiles: GeneratedFiles): {
   }
 }
 `;
-    repairs.push("Added responsive CSS breakpoint.");
+    repairs.push("已补充响应式布局断点。");
     checks.push({
-      name: "Responsive layout",
+      name: "响应式布局",
       passed: true,
-      detail: "Reviewer added a mobile breakpoint.",
+      detail: "审查器已补充移动端断点。",
       repaired: true
     });
   } else {
     checks.push({
-      name: "Responsive layout",
+      name: "响应式布局",
       passed: true,
-      detail: "Responsive CSS breakpoint is present."
+      detail: "已存在响应式断点。"
     });
   }
 
   if (!files["/package.json"]?.trim()) {
     files["/package.json"] = fallbackPackage;
-    repairs.push("Added package metadata for the Sandpack React project.");
+    repairs.push("已补充 Sandpack React 项目所需的 package 元数据。");
     checks.push({
-      name: "Package metadata",
+      name: "项目元数据",
       passed: true,
-      detail: "/package.json was missing and has been created.",
+      detail: "/package.json 缺失，已自动创建。",
       repaired: true
     });
   } else {
     checks.push({
-      name: "Package metadata",
+      name: "项目元数据",
       passed: true,
-      detail: "/package.json is present."
+      detail: "/package.json 已存在。"
     });
   }
 
