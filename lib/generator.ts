@@ -690,11 +690,9 @@ function isGeneratedFiles(value: unknown): value is GeneratedFiles {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
-const LLM_PROVIDER = process.env.LLM_PROVIDER || "compass";
-
 const PROVIDERS = {
   compass: {
-    baseUrl: "http://compass.llm.shopee.io/compass-api/v1/",
+    baseUrl: "https://compass.llm.shopee.io/compass-api/v1/",
     apiKeyEnv: "COMPASS_API_KEY",
     model: "glm-5"
   }
@@ -702,79 +700,138 @@ const PROVIDERS = {
 
 type RemoteProviderName = keyof typeof PROVIDERS;
 
-function getProviderConfig() {
-  if (!(LLM_PROVIDER in PROVIDERS)) {
-    return null;
-  }
+type ProviderAttempt =
+  | {
+      project: GeneratedProject;
+      fallbackReason?: undefined;
+    }
+  | {
+      project: null;
+      fallbackReason?: string;
+    };
 
-  return PROVIDERS[LLM_PROVIDER as RemoteProviderName];
+function getConfiguredProviderName(): string {
+  return (process.env.LLM_PROVIDER || "compass").trim().toLowerCase();
+}
+
+function getProviderLabel(provider: string): string {
+  return provider === "compass" ? "Compass glm-5" : "本地生成器";
 }
 
 function getProviderApiKey(apiKeyEnv: string): string {
   return process.env[apiKeyEnv] || "";
 }
 
-async function generateWithConfiguredProvider(prompt: string, mode: GenerationMode): Promise<GeneratedProject | null> {
-  const config = getProviderConfig();
-  if (!config) {
-    return null;
+function formatProviderError(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) {
+    return clampText(error.message, 240);
   }
 
-  const apiKey = getProviderApiKey(config.apiKeyEnv);
-  if (!apiKey) {
-    return null;
-  }
+  return "未知错误";
+}
 
-  const baseUrl = config.baseUrl.replace(/\/$/, "");
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: config.model,
-      temperature: 0.35,
-      messages: [
-        {
-          role: "system",
-          content:
-            "只返回严格 JSON。生成一个小型 React TypeScript Sandpack 项目。要求结构：{\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。"
-        },
-        {
-          role: "user",
-          content: `模式：${mode}\n需求：${prompt}`
-        }
-      ]
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`AI 服务返回状态码 ${response.status}。`);
-  }
-
-  const data = await response.json();
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error("AI 服务返回了空响应。");
-  }
-
-  const parsed = parseGeneratedJson(content) as { summary?: unknown; files?: unknown };
-  if (!isGeneratedFiles(parsed.files)) {
-    throw new Error("AI 服务响应中缺少 files 对象。");
-  }
-
+function buildLocalProject(prompt: string, mode: GenerationMode, providerNote?: string): GeneratedProject {
   const spec = buildSpec(prompt, mode);
-  const repaired = reviewAndRepairFiles(parsed.files);
+  const repaired = reviewAndRepairFiles(buildReactFiles(spec));
+
   return {
     id: spec.id,
-    summary: typeof parsed.summary === "string" ? parsed.summary : `${spec.title} 已由已配置的 AI 服务生成。`,
+    summary: `${spec.title} 是一个根据需求生成的可运行 ${domainLabel(spec.domain)} React 原型。`,
     spec,
     agents: buildAgentRuns(spec, repaired.review.repairs.length),
     files: repaired.files,
     review: repaired.review,
-    provider: "compass"
+    provider: "local",
+    ...(providerNote ? { providerNote } : {})
   };
+}
+
+async function generateWithConfiguredProvider(prompt: string, mode: GenerationMode): Promise<ProviderAttempt> {
+  const provider = getConfiguredProviderName();
+  if (provider === "local") {
+    return { project: null };
+  }
+
+  if (!(provider in PROVIDERS)) {
+    return {
+      project: null,
+      fallbackReason: `不支持的 LLM_PROVIDER=${provider}，已回退到本地生成器。`
+    };
+  }
+
+  const config = PROVIDERS[provider as RemoteProviderName];
+  const apiKey = getProviderApiKey(config.apiKeyEnv);
+  if (!apiKey) {
+    return {
+      project: null,
+      fallbackReason: `缺少环境变量 ${config.apiKeyEnv}，已回退到本地生成器。`
+    };
+  }
+
+  const baseUrl = config.baseUrl.replace(/\/$/, "");
+
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      signal: AbortSignal.timeout(90_000),
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: config.model,
+        temperature: 0.35,
+        messages: [
+          {
+            role: "system",
+            content:
+              "只返回严格 JSON。生成一个小型 React TypeScript Sandpack 项目。要求结构：{\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。"
+          },
+          {
+            role: "user",
+            content: `模式：${mode}\n需求：${prompt}`
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const detail = clampText(await response.text().catch(() => ""), 240);
+      throw new Error(`AI 服务返回状态码 ${response.status}${detail ? `：${detail}` : "。"}`);
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("AI 服务返回了空响应。");
+    }
+
+    const parsed = parseGeneratedJson(content) as { summary?: unknown; files?: unknown };
+    if (!isGeneratedFiles(parsed.files)) {
+      throw new Error("AI 服务响应中缺少 files 对象。");
+    }
+
+    const spec = buildSpec(prompt, mode);
+    const repaired = reviewAndRepairFiles(parsed.files);
+    return {
+      project: {
+        id: spec.id,
+        summary: typeof parsed.summary === "string" ? parsed.summary : `${spec.title} 已由已配置的 AI 服务生成。`,
+        spec,
+        agents: buildAgentRuns(spec, repaired.review.repairs.length),
+        files: repaired.files,
+        review: repaired.review,
+        provider: "compass"
+      }
+    };
+  } catch (error) {
+    const message = formatProviderError(error);
+    console.error(`[generator] ${getProviderLabel(provider)} 调用失败: ${message}`);
+    return {
+      project: null,
+      fallbackReason: `${getProviderLabel(provider)} 调用失败，已回退到本地生成器：${message}`
+    };
+  }
 }
 
 export async function generateProject(promptInput: unknown, modeInput: unknown = "balanced"): Promise<GeneratedProject> {
@@ -784,26 +841,12 @@ export async function generateProject(promptInput: unknown, modeInput: unknown =
     throw new Error("请输入需求描述。");
   }
 
-  try {
-    const aiResult = await generateWithConfiguredProvider(prompt, mode);
-    if (aiResult) {
-      return aiResult;
-    }
-  } catch {
-    // Keep the demo available when the configured Compass provider fails.
+  const aiResult = await generateWithConfiguredProvider(prompt, mode);
+  if (aiResult.project) {
+    return aiResult.project;
   }
 
-  const spec = buildSpec(prompt, mode);
-  const repaired = reviewAndRepairFiles(buildReactFiles(spec));
-  return {
-    id: spec.id,
-    summary: `${spec.title} 是一个根据需求生成的可运行 ${domainLabel(spec.domain)} React 原型。`,
-    spec,
-    agents: buildAgentRuns(spec, repaired.review.repairs.length),
-    files: repaired.files,
-    review: repaired.review,
-    provider: "local"
-  };
+  return buildLocalProject(prompt, mode, aiResult.fallbackReason);
 }
 
 export function composeRefinePrompt(previousPrompt: unknown, prompt: unknown): string {

@@ -293,7 +293,8 @@ input:focus {
 .sandpack-panel,
 .refine-bar,
 .repair-log,
-.error-banner {
+.error-banner,
+.provider-note {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -343,6 +344,14 @@ input:focus {
   padding: 12px 14px;
   border-color: rgba(179, 57, 49, 0.35);
   color: var(--danger);
+}
+
+.provider-note {
+  padding: 12px 14px;
+  border-color: rgba(165, 104, 0, 0.3);
+  background: rgba(165, 104, 0, 0.08);
+  color: var(--warning);
+  line-height: 1.5;
 }
 
 .review-row {

@@ -423,13 +423,15 @@ export function BuilderShell() {
           </article>
           <article>
             <span>生成来源</span>
-            <strong>{project?.provider === "compass" ? "Compass glm-5" : "本地"}</strong>
+            <strong>{project?.provider === "compass" ? "Compass glm-5" : "本地生成器"}</strong>
           </article>
           <article>
             <span>修复项</span>
             <strong>{repairLog.length}</strong>
           </article>
         </section>
+
+        {project?.providerNote ? <div className="provider-note">{project.providerNote}</div> : null}
 
         <section className="refine-bar">
           <input

@@ -62,6 +62,7 @@ export interface GeneratedProject {
   files: GeneratedFiles;
   review: ReviewResult;
   provider: "local" | "compass";
+  providerNote?: string;
 }
 
 export interface GenerateRequest {

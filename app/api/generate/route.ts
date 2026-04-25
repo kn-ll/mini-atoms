@@ -4,6 +4,8 @@ import { createSseStream, sseResponse } from "@/lib/sse";
 import type { GenerateRequest } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 120;
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
