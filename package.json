@@ -1,0 +1,33 @@
+{
+  "name": "mini-atoms",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A Next.js + TypeScript Mini Atoms demo with streamed agent generation, Sandpack preview, review repair, history, and ZIP export.",
+  "scripts": {
+    "dev": "NEXT_TEST_WASM_DIR=./node_modules/@next/swc-wasm-nodejs next dev",
+    "build": "NEXT_TEST_WASM_DIR=./node_modules/@next/swc-wasm-nodejs next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@codesandbox/sandpack-react": "^2.20.0",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.468.0",
+    "next": "^15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@next/swc-wasm-nodejs": "^15.5.15",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.1.4",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
