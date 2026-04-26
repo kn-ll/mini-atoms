@@ -116,7 +116,7 @@ http://localhost:3000
     "checks": [],
     "repairs": []
   },
-  "provider": "siliconflow"
+  "provider": "compass"
 }
 ```
 

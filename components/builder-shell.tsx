@@ -96,6 +96,18 @@ function isReview(value: unknown): value is ReviewResult {
   return Boolean(value && typeof value === "object" && "score" in value && "checks" in value);
 }
 
+function getProviderDisplayName(provider: GeneratedProject["provider"] | undefined): string {
+  if (provider === "compass") {
+    return "Compass glm-5";
+  }
+
+  if (provider === "siliconflow") {
+    return "SiliconFlow GLM-5.1";
+  }
+
+  return "本地生成器";
+}
+
 function parseSseChunk(block: string): ParsedStreamEvent | null {
   const lines = block.split("\n");
   const eventLine = lines.find((line) => line.startsWith("event:"));
@@ -423,7 +435,7 @@ export function BuilderShell() {
           </article>
           <article>
             <span>生成来源</span>
-            <strong>{project?.provider === "siliconflow" ? "SiliconFlow GLM-5.1" : "本地生成器"}</strong>
+            <strong>{getProviderDisplayName(project?.provider)}</strong>
           </article>
           <article>
             <span>修复项</span>

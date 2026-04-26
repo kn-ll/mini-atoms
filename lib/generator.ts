@@ -691,8 +691,19 @@ function isGeneratedFiles(value: unknown): value is GeneratedFiles {
 }
 
 const PROVIDERS = {
+  compass: {
+    baseUrl: "http://compass.llm.shopee.io/compass-api/v1/",
+    baseUrlEnv: "COMPASS_BASE_URL",
+    apiKeyEnv: "COMPASS_API_KEY",
+    model: "glm-5",
+    modelEnv: "COMPASS_MODEL",
+    timeoutEnv: "COMPASS_TIMEOUT_MS",
+    timeoutMs: 180_000,
+    label: "Compass glm-5"
+  },
   siliconflow: {
     baseUrl: "https://api.siliconflow.cn/v1/",
+    baseUrlEnv: "SILICONFLOW_BASE_URL",
     apiKeyEnv: "SILICONFLOW_API_KEY",
     model: "Pro/zai-org/GLM-5.1",
     modelEnv: "SILICONFLOW_MODEL",
@@ -715,7 +726,7 @@ type ProviderAttempt =
     };
 
 function getConfiguredProviderName(): string {
-  return (process.env.LLM_PROVIDER || "siliconflow").trim().toLowerCase();
+  return (process.env.LLM_PROVIDER || "compass").trim().toLowerCase();
 }
 
 function getProviderLabel(provider: string): string {
@@ -732,6 +743,12 @@ function getProviderLabel(provider: string): string {
 
 function getProviderApiKey(apiKeyEnv: string): string {
   return process.env[apiKeyEnv] || "";
+}
+
+function getProviderBaseUrl(provider: RemoteProviderName): string {
+  const config = PROVIDERS[provider];
+  const override = process.env[config.baseUrlEnv]?.trim();
+  return override || config.baseUrl;
 }
 
 function getProviderModel(provider: RemoteProviderName): string {
@@ -761,6 +778,16 @@ function formatProviderError(error: unknown): string {
   }
 
   return "未知错误";
+}
+
+function getResponseTraceId(response: Response): string {
+  return (
+    response.headers.get("x-request-id") ||
+    response.headers.get("x-trace-id") ||
+    response.headers.get("trace-id") ||
+    response.headers.get("x-siliconcloud-trace-id") ||
+    ""
+  );
 }
 
 function buildLocalProject(prompt: string, mode: GenerationMode, providerNote?: string): GeneratedProject {
@@ -801,8 +828,8 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
     };
   }
 
-  const baseUrl = config.baseUrl.replace(/\/$/, "");
   const remoteProvider = provider as RemoteProviderName;
+  const baseUrl = getProviderBaseUrl(remoteProvider).replace(/\/$/, "");
   const model = getProviderModel(remoteProvider);
   const timeoutMs = getProviderTimeoutMs(remoteProvider);
 
@@ -833,7 +860,7 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
 
     if (!response.ok) {
       const detail = clampText(await response.text().catch(() => ""), 240);
-      const traceId = response.headers.get("x-siliconcloud-trace-id");
+      const traceId = getResponseTraceId(response);
       throw new Error(`AI 服务返回状态码 ${response.status}${detail ? `：${detail}` : "。"}${traceId ? ` trace_id=${traceId}` : ""}`);
     }
 
@@ -858,7 +885,7 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
         agents: buildAgentRuns(spec, repaired.review.repairs.length),
         files: repaired.files,
         review: repaired.review,
-        provider: "siliconflow"
+        provider: remoteProvider
       }
     };
   } catch (error) {

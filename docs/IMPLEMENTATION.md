@@ -123,7 +123,7 @@ lib/generator.ts
 
 | 层 | 说明 |
 | --- | --- |
-| SiliconFlow Provider | 通过 SiliconFlow 的 Chat Completions 兼容接口接入，默认 `LLM_PROVIDER=siliconflow`，配置 `SILICONFLOW_API_KEY` 后启用 `Pro/zai-org/GLM-5.1` |
+| Compass Provider | 参考 `listing_ai_v1`，通过 Compass 的 Chat Completions 兼容接口接入，默认 `LLM_PROVIDER=compass`，配置 `COMPASS_API_KEY` 后启用 `glm-5` |
 | Local Generator | 默认启用，保证无 API Key 时仍可体验 |
 
 本地生成器会根据 Prompt 推断：

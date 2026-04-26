@@ -106,12 +106,12 @@ mini-atoms-result.json
 
 默认使用本地生成器，保证没有 API Key 时也能运行。
 
-配置以下环境变量后，后端会尝试调用 SiliconFlow 的 Chat Completions 兼容接口，默认模型为 `Pro/zai-org/GLM-5.1`：
+配置以下环境变量后，后端会尝试调用 Compass 的 Chat Completions 兼容接口，默认模型为 `glm-5`：
 
 ```text
-LLM_PROVIDER=siliconflow
-SILICONFLOW_API_KEY
-SILICONFLOW_MODEL=Pro/zai-org/GLM-5.1
+LLM_PROVIDER=compass
+COMPASS_API_KEY
+COMPASS_MODEL=glm-5
 ```
 
 Provider 失败时会自动回退到本地生成器。
