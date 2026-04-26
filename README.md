@@ -51,7 +51,10 @@ http://localhost:3000
 LLM_PROVIDER=siliconflow
 SILICONFLOW_API_KEY=your_api_key
 SILICONFLOW_MODEL=Pro/zai-org/GLM-5.1
+SILICONFLOW_TIMEOUT_MS=600000
 ```
+
+`SILICONFLOW_TIMEOUT_MS` 默认是 `600000`，也就是 10 分钟。
 
 ## 目录结构
 

@@ -5,7 +5,7 @@ import type { GenerateRequest } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 600;
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

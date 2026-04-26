@@ -696,6 +696,8 @@ const PROVIDERS = {
     apiKeyEnv: "SILICONFLOW_API_KEY",
     model: "Pro/zai-org/GLM-5.1",
     modelEnv: "SILICONFLOW_MODEL",
+    timeoutEnv: "SILICONFLOW_TIMEOUT_MS",
+    timeoutMs: 600_000,
     label: "SiliconFlow GLM-5.1"
   }
 } as const;
@@ -736,6 +738,21 @@ function getProviderModel(provider: RemoteProviderName): string {
   const config = PROVIDERS[provider];
   const override = process.env[config.modelEnv]?.trim();
   return override || config.model;
+}
+
+function getProviderTimeoutMs(provider: RemoteProviderName): number {
+  const config = PROVIDERS[provider];
+  const raw = process.env[config.timeoutEnv]?.trim();
+  if (!raw) {
+    return config.timeoutMs;
+  }
+
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 1_000) {
+    return config.timeoutMs;
+  }
+
+  return Math.floor(parsed);
 }
 
 function formatProviderError(error: unknown): string {
@@ -785,12 +802,14 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
   }
 
   const baseUrl = config.baseUrl.replace(/\/$/, "");
-  const model = getProviderModel(provider as RemoteProviderName);
+  const remoteProvider = provider as RemoteProviderName;
+  const model = getProviderModel(remoteProvider);
+  const timeoutMs = getProviderTimeoutMs(remoteProvider);
 
   try {
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
-      signal: AbortSignal.timeout(90_000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${apiKey}`
