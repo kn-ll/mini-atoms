@@ -705,11 +705,11 @@ const PROVIDERS = {
     baseUrl: "https://api.siliconflow.cn/v1/",
     baseUrlEnv: "SILICONFLOW_BASE_URL",
     apiKeyEnv: "SILICONFLOW_API_KEY",
-    model: "Pro/zai-org/GLM-5.1",
+    model: "Pro/MiniMaxAI/MiniMax-M2.5",
     modelEnv: "SILICONFLOW_MODEL",
     timeoutEnv: "SILICONFLOW_TIMEOUT_MS",
     timeoutMs: 295_000,
-    label: "SiliconFlow GLM-5.1"
+    label: "SiliconFlow MiniMax M2.5"
   }
 } as const;
 
@@ -726,7 +726,7 @@ type ProviderAttempt =
     };
 
 function getConfiguredProviderName(): string {
-  return (process.env.LLM_PROVIDER || "compass").trim().toLowerCase();
+  return (process.env.LLM_PROVIDER || "siliconflow").trim().toLowerCase();
 }
 
 function getProviderLabel(provider: string): string {
