@@ -50,14 +50,14 @@ http://localhost:3000
 LLM_PROVIDER=siliconflow
 SILICONFLOW_API_KEY
 SILICONFLOW_MODEL=Pro/zai-org/GLM-5.1
-SILICONFLOW_TIMEOUT_MS=600000
+SILICONFLOW_TIMEOUT_MS=295000
 ```
 
 7. Environment Variables 要勾选实际使用的环境，例如 `Production` 或 `Preview`。
 8. 修改环境变量后必须重新部署，旧 Deployment 不会自动拿到新值。
-9. `app/api/generate/route.ts` 与 `app/api/refine/route.ts` 已显式设置 `runtime=nodejs` 和 `maxDuration=600`，用于容纳 5 到 10 分钟的 AI 生成。
-10. `SILICONFLOW_TIMEOUT_MS` 默认是 `600000`，也就是 10 分钟；如果你希望更短或更长，可以按毫秒覆盖。
-11. 如果部署在 Vercel，实际可用上限仍取决于当前套餐和平台限制。
+9. `app/api/generate/route.ts` 与 `app/api/refine/route.ts` 当前设置为 `runtime=nodejs` 和 `maxDuration=300`，兼容 Vercel Hobby。
+10. `SILICONFLOW_TIMEOUT_MS` 默认是 `295000`，略低于 Vercel Hobby 的 300 秒上限，避免平台先硬切断。
+11. 如果你需要 5 分钟以上，Vercel Hobby 做不到；需要升级到支持更长函数时长的套餐或改成异步任务架构。
 12. 如果页面显示“生成来源 = 本地生成器”，继续看页面下方的黄色提示，会直接显示 SiliconFlow 回退原因，例如缺少环境变量、请求超时或上游报错。
 
 ## 5. API 测试

@@ -51,10 +51,11 @@ http://localhost:3000
 LLM_PROVIDER=siliconflow
 SILICONFLOW_API_KEY=your_api_key
 SILICONFLOW_MODEL=Pro/zai-org/GLM-5.1
-SILICONFLOW_TIMEOUT_MS=600000
+SILICONFLOW_TIMEOUT_MS=295000
 ```
 
-`SILICONFLOW_TIMEOUT_MS` 默认是 `600000`，也就是 10 分钟。
+`SILICONFLOW_TIMEOUT_MS` 默认是 `295000`，用于兼容 Vercel Hobby 的 300 秒上限。
+如果你升级到支持更长函数时长的平台或套餐，可以再调大。
 
 ## 目录结构
 

@@ -697,7 +697,7 @@ const PROVIDERS = {
     model: "Pro/zai-org/GLM-5.1",
     modelEnv: "SILICONFLOW_MODEL",
     timeoutEnv: "SILICONFLOW_TIMEOUT_MS",
-    timeoutMs: 600_000,
+    timeoutMs: 295_000,
     label: "SiliconFlow GLM-5.1"
   }
 } as const;
