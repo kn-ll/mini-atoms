@@ -710,6 +710,16 @@ const PROVIDERS = {
     timeoutEnv: "SILICONFLOW_TIMEOUT_MS",
     timeoutMs: 295_000,
     label: "SiliconFlow Kimi K2.6"
+  },
+  deepseek: {
+    baseUrl: "https://api.deepseek.com",
+    baseUrlEnv: "DEEPSEEK_BASE_URL",
+    apiKeyEnv: "DEEPSEEK_API_KEY",
+    model: "deepseek-v4-flash",
+    modelEnv: "DEEPSEEK_MODEL",
+    timeoutEnv: "DEEPSEEK_TIMEOUT_MS",
+    timeoutMs: 295_000,
+    label: "DeepSeek API"
   }
 } as const;
 
@@ -726,7 +736,7 @@ type ProviderAttempt =
     };
 
 function getConfiguredProviderName(): string {
-  return (process.env.LLM_PROVIDER || "siliconflow").trim().toLowerCase();
+  return (process.env.LLM_PROVIDER || "deepseek").trim().toLowerCase();
 }
 
 function getProviderLabel(provider: string): string {
@@ -830,6 +840,33 @@ function buildCompassForbiddenMessage(traceId: string): string {
   return `Compass 返回 403，常见原因：API Key 无效或无权限、当前运行环境不在公司内网/VPN、或命中了受限网关。${traceId ? ` trace_id=${traceId}` : ""}`;
 }
 
+function buildChatCompletionRequestBody(provider: RemoteProviderName, model: string, mode: GenerationMode, prompt: string) {
+  const body: Record<string, unknown> = {
+    model,
+    messages: [
+      {
+        role: "system",
+        content:
+          '只返回严格 JSON / json 对象。生成一个小型 React TypeScript Sandpack 项目。要求结构：{"summary": string, "files": {"/App.tsx": string, "/styles.css": string, "/package.json": string, "/README.md": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。'
+      },
+      {
+        role: "user",
+        content: `模式：${mode}\n需求：${prompt}`
+      }
+    ]
+  };
+
+  if (!(provider === "deepseek" && model === "deepseek-reasoner")) {
+    body.temperature = 0.35;
+  }
+
+  if (provider === "deepseek") {
+    body.response_format = { type: "json_object" };
+  }
+
+  return body;
+}
+
 function buildLocalProject(prompt: string, mode: GenerationMode, providerNote?: string): GeneratedProject {
   const spec = buildSpec(prompt, mode);
   const repaired = reviewAndRepairFiles(buildReactFiles(spec));
@@ -884,21 +921,7 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
           "content-type": "application/json",
           authorization: `Bearer ${apiKey}`
         },
-        body: JSON.stringify({
-          model,
-          temperature: 0.35,
-          messages: [
-            {
-              role: "system",
-              content:
-                "只返回严格 JSON。生成一个小型 React TypeScript Sandpack 项目。要求结构：{\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。"
-            },
-            {
-              role: "user",
-              content: `模式：${mode}\n需求：${prompt}`
-            }
-          ]
-        })
+        body: JSON.stringify(buildChatCompletionRequestBody(remoteProvider, model, mode, prompt))
       });
 
       if (!response.ok) {
@@ -938,7 +961,8 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
           agents: buildAgentRuns(spec, repaired.review.repairs.length),
           files: repaired.files,
           review: repaired.review,
-          provider: remoteProvider
+          provider: remoteProvider,
+          providerModel: model
         }
       };
     }

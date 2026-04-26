@@ -10,7 +10,7 @@ export type ToneType = "modern" | "dark" | "warm" | "enterprise";
 
 export type GeneratedFiles = Record<string, string>;
 
-export type ProviderName = "local" | "compass" | "siliconflow";
+export type ProviderName = "local" | "compass" | "siliconflow" | "deepseek";
 
 export interface AgentDefinition {
   id: AgentId;
@@ -64,6 +64,7 @@ export interface GeneratedProject {
   files: GeneratedFiles;
   review: ReviewResult;
   provider: ProviderName;
+  providerModel?: string;
   providerNote?: string;
 }
 

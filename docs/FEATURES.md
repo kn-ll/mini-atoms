@@ -106,12 +106,12 @@ mini-atoms-result.json
 
 默认使用本地生成器，保证没有 API Key 时也能运行。
 
-配置以下环境变量后，后端会尝试调用 SiliconFlow 的 Chat Completions 兼容接口，默认模型为 `Pro/moonshotai/Kimi-K2.6`：
+配置以下环境变量后，后端会尝试调用 DeepSeek 的 Chat Completions 兼容接口，默认模型为 `deepseek-v4-flash`：
 
 ```text
-LLM_PROVIDER=siliconflow
-SILICONFLOW_API_KEY
-SILICONFLOW_MODEL=Pro/moonshotai/Kimi-K2.6
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY
+DEEPSEEK_MODEL=deepseek-v4-flash
 ```
 
 Provider 失败时会自动回退到本地生成器。

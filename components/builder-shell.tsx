@@ -105,6 +105,10 @@ function getProviderDisplayName(provider: GeneratedProject["provider"] | undefin
     return "SiliconFlow Kimi K2.6";
   }
 
+  if (provider === "deepseek") {
+    return "DeepSeek Chat";
+  }
+
   return "本地生成器";
 }
 
@@ -435,7 +439,7 @@ export function BuilderShell() {
           </article>
           <article>
             <span>生成来源</span>
-            <strong>{getProviderDisplayName(project?.provider)}</strong>
+            <strong>{project?.providerModel || getProviderDisplayName(project?.provider)}</strong>
           </article>
           <article>
             <span>修复项</span>

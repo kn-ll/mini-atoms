@@ -123,7 +123,7 @@ lib/generator.ts
 
 | 层 | 说明 |
 | --- | --- |
-| SiliconFlow Provider | 通过 SiliconFlow 的 Chat Completions 兼容接口接入，默认 `LLM_PROVIDER=siliconflow`，配置 `SILICONFLOW_API_KEY` 后启用 `Pro/moonshotai/Kimi-K2.6` |
+| DeepSeek Provider | 按官方文档通过 DeepSeek 的 Chat Completions 兼容接口接入，默认 `LLM_PROVIDER=deepseek`，配置 `DEEPSEEK_API_KEY` 后启用 `deepseek-v4-flash`，并使用 `response_format={"type":"json_object"}` 保证 JSON 输出 |
 | Local Generator | 默认启用，保证无 API Key 时仍可体验 |
 
 本地生成器会根据 Prompt 推断：
