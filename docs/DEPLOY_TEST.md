@@ -44,13 +44,13 @@ http://localhost:3000
 3. Framework Preset 选择 Next.js。
 4. Build Command 使用 `npm run build`。
 5. Output Directory 保持默认。
-6. 如需接入 SiliconFlow `Pro/MiniMaxAI/MiniMax-M2.5`，在 Environment Variables 中配置：
+6. 如需接入 SiliconFlow `Pro/moonshotai/Kimi-K2.6`，在 Environment Variables 中配置：
 
 ```text
 LLM_PROVIDER=siliconflow
 SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 SILICONFLOW_API_KEY
-SILICONFLOW_MODEL=Pro/MiniMaxAI/MiniMax-M2.5
+SILICONFLOW_MODEL=Pro/moonshotai/Kimi-K2.6
 SILICONFLOW_TIMEOUT_MS=295000
 ```
 

@@ -102,7 +102,7 @@ function getProviderDisplayName(provider: GeneratedProject["provider"] | undefin
   }
 
   if (provider === "siliconflow") {
-    return "SiliconFlow MiniMax M2.5";
+    return "SiliconFlow Kimi K2.6";
   }
 
   return "本地生成器";

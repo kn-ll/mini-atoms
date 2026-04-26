@@ -705,11 +705,11 @@ const PROVIDERS = {
     baseUrl: "https://api.siliconflow.cn/v1/",
     baseUrlEnv: "SILICONFLOW_BASE_URL",
     apiKeyEnv: "SILICONFLOW_API_KEY",
-    model: "Pro/MiniMaxAI/MiniMax-M2.5",
+    model: "Pro/moonshotai/Kimi-K2.6",
     modelEnv: "SILICONFLOW_MODEL",
     timeoutEnv: "SILICONFLOW_TIMEOUT_MS",
     timeoutMs: 295_000,
-    label: "SiliconFlow MiniMax M2.5"
+    label: "SiliconFlow Kimi K2.6"
   }
 } as const;
 
