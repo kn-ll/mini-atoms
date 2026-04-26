@@ -790,6 +790,46 @@ function getResponseTraceId(response: Response): string {
   );
 }
 
+function buildProviderBaseUrls(provider: RemoteProviderName): string[] {
+  const primary = getProviderBaseUrl(provider).replace(/\/$/, "");
+  if (provider !== "compass") {
+    return [primary];
+  }
+
+  if (primary.startsWith("http://")) {
+    return [primary, primary.replace(/^http:\/\//, "https://")];
+  }
+
+  return [primary];
+}
+
+function isHtmlForbiddenResponse(response: Response, body: string): boolean {
+  const contentType = response.headers.get("content-type") || "";
+  return response.status === 403 && (/text\/html/i.test(contentType) || /<html[\s>]/i.test(body));
+}
+
+function summarizeProviderErrorBody(response: Response, body: string): string {
+  const contentType = response.headers.get("content-type") || "";
+  const trimmed = clampText(body, 240);
+
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/text\/html/i.test(contentType) || /<html[\s>]/i.test(trimmed)) {
+    if (response.status === 403) {
+      return "网关返回 403 Forbidden HTML 页面";
+    }
+    return `网关返回 HTML 页面（status=${response.status}）`;
+  }
+
+  return trimmed;
+}
+
+function buildCompassForbiddenMessage(traceId: string): string {
+  return `Compass 返回 403，常见原因：API Key 无效或无权限、当前运行环境不在公司内网/VPN、或命中了受限网关。${traceId ? ` trace_id=${traceId}` : ""}`;
+}
+
 function buildLocalProject(prompt: string, mode: GenerationMode, providerNote?: string): GeneratedProject {
   const spec = buildSpec(prompt, mode);
   const repaired = reviewAndRepairFiles(buildReactFiles(spec));
@@ -829,65 +869,81 @@ async function generateWithConfiguredProvider(prompt: string, mode: GenerationMo
   }
 
   const remoteProvider = provider as RemoteProviderName;
-  const baseUrl = getProviderBaseUrl(remoteProvider).replace(/\/$/, "");
+  const baseUrls = buildProviderBaseUrls(remoteProvider);
   const model = getProviderModel(remoteProvider);
   const timeoutMs = getProviderTimeoutMs(remoteProvider);
 
   try {
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      signal: AbortSignal.timeout(timeoutMs),
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.35,
-        messages: [
-          {
-            role: "system",
-            content:
-              "只返回严格 JSON。生成一个小型 React TypeScript Sandpack 项目。要求结构：{\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。"
-          },
-          {
-            role: "user",
-            content: `模式：${mode}\n需求：${prompt}`
+    let lastError: Error | null = null;
+
+    for (const baseUrl of baseUrls) {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        signal: AbortSignal.timeout(timeoutMs),
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0.35,
+          messages: [
+            {
+              role: "system",
+              content:
+                "只返回严格 JSON。生成一个小型 React TypeScript Sandpack 项目。要求结构：{\"summary\": string, \"files\": {\"/App.tsx\": string, \"/styles.css\": string, \"/package.json\": string, \"/README.md\": string}}。所有用户可见文案必须为简体中文。不要使用远程资源。"
+            },
+            {
+              role: "user",
+              content: `模式：${mode}\n需求：${prompt}`
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        const rawBody = await response.text().catch(() => "");
+        const traceId = getResponseTraceId(response);
+
+        if (remoteProvider === "compass" && isHtmlForbiddenResponse(response, rawBody)) {
+          lastError = new Error(buildCompassForbiddenMessage(traceId));
+          if (baseUrl !== baseUrls[baseUrls.length - 1]) {
+            continue;
           }
-        ]
-      })
-    });
+          throw lastError;
+        }
 
-    if (!response.ok) {
-      const detail = clampText(await response.text().catch(() => ""), 240);
-      const traceId = getResponseTraceId(response);
-      throw new Error(`AI 服务返回状态码 ${response.status}${detail ? `：${detail}` : "。"}${traceId ? ` trace_id=${traceId}` : ""}`);
-    }
-
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("AI 服务返回了空响应。");
-    }
-
-    const parsed = parseGeneratedJson(content) as { summary?: unknown; files?: unknown };
-    if (!isGeneratedFiles(parsed.files)) {
-      throw new Error("AI 服务响应中缺少 files 对象。");
-    }
-
-    const spec = buildSpec(prompt, mode);
-    const repaired = reviewAndRepairFiles(parsed.files);
-    return {
-      project: {
-        id: spec.id,
-        summary: typeof parsed.summary === "string" ? parsed.summary : `${spec.title} 已由已配置的 AI 服务生成。`,
-        spec,
-        agents: buildAgentRuns(spec, repaired.review.repairs.length),
-        files: repaired.files,
-        review: repaired.review,
-        provider: remoteProvider
+        const detail = summarizeProviderErrorBody(response, rawBody);
+        throw new Error(`AI 服务返回状态码 ${response.status}${detail ? `：${detail}` : "。"}${traceId ? ` trace_id=${traceId}` : ""}`);
       }
-    };
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error("AI 服务返回了空响应。");
+      }
+
+      const parsed = parseGeneratedJson(content) as { summary?: unknown; files?: unknown };
+      if (!isGeneratedFiles(parsed.files)) {
+        throw new Error("AI 服务响应中缺少 files 对象。");
+      }
+
+      const spec = buildSpec(prompt, mode);
+      const repaired = reviewAndRepairFiles(parsed.files);
+      return {
+        project: {
+          id: spec.id,
+          summary: typeof parsed.summary === "string" ? parsed.summary : `${spec.title} 已由已配置的 AI 服务生成。`,
+          spec,
+          agents: buildAgentRuns(spec, repaired.review.repairs.length),
+          files: repaired.files,
+          review: repaired.review,
+          provider: remoteProvider
+        }
+      };
+    }
+
+    throw lastError || new Error("AI 服务调用失败。");
   } catch (error) {
     const message = formatProviderError(error);
     console.error(`[generator] ${getProviderLabel(provider)} 调用失败: ${message}`);
